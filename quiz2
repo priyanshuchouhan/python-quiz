@@ -1,0 +1,80 @@
+import json
+
+
+QUIZ_FILE = "quiz_data.json"
+
+def load_quiz_data():
+    try:
+        with open(QUIZ_FILE, "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        print("Quiz data file not found. Please ensure the file exists.")
+        return []
+    except json.JSONDecodeError:
+        print("Error reading the quiz data file. Please ensure the file is in valid JSON format.")
+        return []
+
+
+def save_quiz_data(quiz_data):
+    with open(QUIZ_FILE, "w") as file:
+        json.dump(quiz_data, file, indent=4)
+
+
+def conduct_quiz(quiz_data):
+    score = 0
+    for index, question in enumerate(quiz_data):
+        print(f"Question {index + 1}: {question['question']}")
+        for option in question["options"]:
+            print(option)
+        try:
+            user_answer = int(input("Enter your choice (1-4): "))
+            if user_answer == question["answer"]:
+                print("Correct! 🎉")
+                score += 1
+            else:
+                print(f"Wrong! The correct answer is {question['answer']}.")
+        except ValueError:
+            print("Invalid input! Please enter a number between 1 and 4.")
+        print("-" * 50)
+    print(f"Quiz Finished! Your final score is: {score}/{len(quiz_data)}")
+
+def main():
+    quiz_data = load_quiz_data()
+    if not quiz_data:
+        return
+
+  
+    conduct_quiz(quiz_data)
+
+
+def add_question():
+    quiz_data = load_quiz_data()
+
+    question_text = input("Enter the question: ")
+    options = []
+    for i in range(4):
+        options.append(input(f"Enter option {i + 1}: "))
+    correct_answer = int(input("Enter the correct option number (1-4): "))
+
+    quiz_data.append({
+        "question": question_text,
+        "options": [f"{i + 1}. {option}" for i, option in enumerate(options)],
+        "answer": correct_answer
+    })
+
+    save_quiz_data(quiz_data)
+    print("Question added successfully!")
+
+
+if __name__ == "__main__":
+    print("Welcome to the Quiz App!")
+    print("1. Take the quiz")
+    print("2. Add a new question (Admin)")
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        main()
+    elif choice == "2":
+        add_question()
+    else:
+        print("Invalid choice!")
